@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
      name='sklearn_fuzzy',
-     version='0.0.1',
+     version='0.0.8',
      author="Anderson Vinicius",
      author_email="andersonvaf@gmail.com",
      description="`sklearn_fuzzy` is a fork from `scikit-fuzzy` package with sklearn-ish methods.",

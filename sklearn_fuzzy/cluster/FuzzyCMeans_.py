@@ -4,6 +4,7 @@ cmeans.py : Fuzzy C-means clustering algorithm.
 import numpy as np
 from scipy.spatial.distance import cdist
 from .normalize_columns import normalize_columns, normalize_power_columns
+from sklearn.base import BaseEstimator, ClusterMixin
 
 
 def _cmeans0(data, u_old, c, m, metric):
@@ -307,7 +308,7 @@ def _cmeans_predict0(test_data, cntr, u_old, c, m, metric):
     return u, jm, d
 
 
-class FuzzyCMeans:
+class FuzzyCMeans(BaseEstimator, ClusterMixin):
     """
     Fuzzy c-means clustering algorithm [1].
 
@@ -371,6 +372,21 @@ class FuzzyCMeans:
     .. [2] Winkler, R., Klawonn, F., & Kruse, R. Fuzzy c-means in high
            dimensional spaces. 2012. Contemporary Theory and Pragmatic
            Approaches in Fuzzy Computing Utilization, 1.
+
+    Examples
+    --------
+    >>> from sklearn_fuzzy.cluster import FuzzyCMeans
+    >>> import numpy as np
+    >>> X = np.array([[1, 2], [1, 4], [1, 0],
+    ...               [10, 2], [10, 4], [10, 0]])
+    >>> fcm = FuzzyCMeans(n_clusters=2, m=2, seed=0).fit(X)
+    >>> fcm.labels_
+    array([1, 1, 1, 0, 0, 0], dtype=int64)
+    >>> fcm.predict(np.array([[0, 0], [12, 3]]))
+    array([1, 0], dtype=int64)
+    >>> fcm.cluster_centers_
+    array([[9.98707239, 1.99991256],
+          [1.01292761, 2.00008743]])
     """
 
     def __init__(self, n_clusters=3, m=2, tol=1e-4, max_iter=1000, metric='euclidean', init=None, seed=None):
@@ -402,6 +418,16 @@ class FuzzyCMeans:
         y : Ignored
             not used, present here for API consistency by convention.
         """
+
+        if self.max_iter <= 0:
+            raise ValueError('Number of iterations should be a positive number,'
+                             ' got %d instead' % self.max_iter)
+
+        # verify that the number of samples given is larger than k
+        if X.shape[0] < self.n_clusters:
+            raise ValueError("n_samples=%d should be >= n_clusters=%d" % (
+                             X.shape[0], self.n_clusters))
+
         data = X.T  # scikit-fuzzy works with a transposed matrix, differently from sklearn standards
 
         self.cluster_centers_, self.fuzzy_matrix_, self.init_fuzzy_matrix_, self.distance_matrix_, \

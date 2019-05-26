@@ -9,7 +9,7 @@ bring most of the core functionality into the base namespace.
 
 Recommended Use
 ---------------
->>> import sklearn_fuzzy_
+>>> import sklearn_fuzzy
 
 """
 
